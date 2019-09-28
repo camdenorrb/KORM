@@ -199,7 +199,6 @@ internal object Reflect {
         }
     }
 
-
     private val arrayTypes = setOf(ByteArray::class, ShortArray::class, IntArray::class, LongArray::class, FloatArray::class, DoubleArray::class, BooleanArray::class, CharArray::class)
 
     fun <T : Any> ensureIs(data: Any, clazz: KClass<T>): T {

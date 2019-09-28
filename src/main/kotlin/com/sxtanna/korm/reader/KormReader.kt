@@ -19,12 +19,13 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
 import java.nio.charset.Charset
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
 import kotlin.reflect.full.cast
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.superclasses
 
 /**
  * This thing literally reads from various sources and spits out korm types
@@ -617,6 +618,15 @@ class KormReader {
             val codec = Reflect.findAnnotation<KormCustomCodec>(clazz)
             if (codec != null) {
                 return extractFrom(codec.codec)
+            }
+
+            clazz.superclasses.forEach {
+
+                val puller = getCustomPull(it)
+
+                if (puller != null) {
+                    return puller as? KormPuller<T>
+                }
             }
 
             return null

@@ -10,9 +10,10 @@ import com.sxtanna.korm.data.custom.KormList
 import com.sxtanna.korm.writer.base.Options
 import com.sxtanna.korm.writer.base.WriterOptions
 import java.io.*
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.superclasses
 
 /**
  * This other thing literally takes any object and spits out a serialized korm representation
@@ -771,6 +772,15 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
             val codec = Reflect.findAnnotation<KormCustomCodec>(clazz)
             if (codec != null) {
                 return extractFrom(codec.codec)
+            }
+
+            clazz.superclasses.forEach {
+
+                val pusher = getCustomPush(it)
+
+                if (pusher != null) {
+                    return pusher as? KormPusher<T>
+                }
             }
 
             return null
