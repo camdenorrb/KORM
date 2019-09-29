@@ -30,13 +30,13 @@ sealed class Message {
 
             return when (name.asBase()?.data ?: return null) {
                 "Join" -> {
-                    reader.mapInstance(Join::class, types)
+                    reader.mapInstance(Join::class, this, types)
                 }
                 "Quit" -> {
-                    reader.mapInstance(Quit::class, types)
+                    reader.mapInstance(Quit::class, this, types)
                 }
                 "Error" -> {
-                    reader.mapInstance(Error::class, types)
+                    reader.mapInstance(Error::class, this, types)
                 }
                 else -> {
                     null

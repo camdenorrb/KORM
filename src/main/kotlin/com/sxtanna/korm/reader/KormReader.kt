@@ -250,12 +250,12 @@ class KormReader {
         }
 
 
-        fun <T : Any> mapInstance(clazz: KClass<out T>, types: MutableList<KormType> = this.types): T? {
+        fun <T : Any> mapInstance(clazz: KClass<out T>, kormPuller: KormPuller<*>? = null, types: MutableList<KormType> = this.types): T? {
             if (types.isEmpty()) {
                 return null
             }
 
-            val custom = getCustomPull(clazz)
+            val custom = getCustomPull(clazz, kormPuller)
 
 
             val instance = if (custom != null) {
@@ -334,7 +334,7 @@ class KormReader {
 
                             if (type.isArray.not()) {
                                 if (Reflect.findAnnotation<KormList>(type.kotlin) != null) {
-                                    return mapInstance<Any>(type.kotlin, mutableListOf(korm))
+                                    return mapInstance<Any>(type.kotlin, null, mutableListOf(korm))
                                 }
                                 return null
                             }
@@ -365,7 +365,7 @@ class KormReader {
                 is KormType.HashType -> {
                     when (type) {
                         is Class<*> -> {
-                            mapInstance(type.kotlin, korm.data.toMutableList())
+                            mapInstance(type.kotlin, null, korm.data.toMutableList())
                         }
                         is WildcardType -> {
                             mapKormToType(korm, type.upperBounds[0])
@@ -604,7 +604,7 @@ class KormReader {
         }
 
 
-        fun <T : Any> getCustomPull(clazz: KClass<T>): KormPuller<T>? {
+        fun <T : Any> getCustomPull(clazz: KClass<T>, caller: KormPuller<*>? = null): KormPuller<T>? {
             val storedPuller = korm.pullerOf(clazz)
             if (storedPuller != null) {
                 return storedPuller
@@ -623,6 +623,10 @@ class KormReader {
             clazz.superclasses.forEach {
 
                 val puller = getCustomPull(it)
+
+                if (caller != null && caller == puller) {
+                    return null // Prevent stack overflow
+                }
 
                 if (puller != null) {
                     return puller as? KormPuller<T>
