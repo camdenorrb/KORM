@@ -86,7 +86,7 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
             }
 
             if (nameIsBlank) cont.writeIndent()
-            cont.writeData(data, name.isNotBlank())
+            cont.writeData(data, null, name.isNotBlank())
             cont.writeNewLine()
         }
 
@@ -301,7 +301,7 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
 
         override fun exec() {
             if (Reflect.isKormType(data::class)) {
-                writeData(data)
+                writeData(data, null)
             } else {
                 indentLess() // hot fix
                 writeFields(data, Reflect.findAnnotation<KormList>(data::class)?.props?.toList())
@@ -395,7 +395,7 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
                         }
                     }
 
-                    writeData(it, listed = true)
+                    writeData(it, null, listed = true)
 
                     if (i < list.lastIndex) {
                         writeComma()
@@ -491,7 +491,7 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
                 }
 
                 writeName(name ?: "null")
-                writeData(data ?: "null", true)
+                writeData(data ?: "null", null, true)
 
                 if (cur++ < max) {
                     if (options.commaAfterHashEntry) {
@@ -578,7 +578,7 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
                         writeComplexTick()
                     }
 
-                    writeData(inst)
+                    writeData(inst, null)
 
                     if (name) {
                         writeComplexTick()
@@ -601,11 +601,11 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
             }
         }
 
-        fun writeData(inst: Any, named: Boolean = false, listed: Boolean = false) {
+        fun writeData(inst: Any, kormPusher: KormPusher<*>?, named: Boolean = false, listed: Boolean = false) {
             val clazz = inst::class
 
             @Suppress("UNCHECKED_CAST")
-            val custom = getCustomPush(clazz) as? KormPusher<Any>
+            val custom = getCustomPush(clazz, kormPusher) as? KormPusher<Any>
 
             if (custom != null) custom.push(this, inst)
             else {
@@ -723,7 +723,7 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
                         }
 
                         writeName(name)
-                        writeData(data, true)
+                        writeData(data, null, true)
 
                         if (index < fields.lastIndex) {
                             if (options.commaAfterHashEntry) {
