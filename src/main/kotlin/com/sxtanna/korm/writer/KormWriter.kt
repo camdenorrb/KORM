@@ -758,7 +758,7 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
         }
 
 
-        fun <T : Any> getCustomPush(clazz: KClass<T>): KormPusher<T>? {
+        fun <T : Any> getCustomPush(clazz: KClass<T>, kormPusher: KormPusher<*>? = null): KormPusher<T>? {
             val storedPusher = korm.pusherOf(clazz)
             if (storedPusher != null) {
                 return storedPusher
@@ -777,6 +777,10 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
             clazz.superclasses.forEach {
 
                 val pusher = getCustomPush(it)
+
+                if (kormPusher != null && kormPusher == pusher) {
+                    return null // Prevent recursion issues
+                }
 
                 if (pusher != null) {
                     return pusher as? KormPusher<T>
