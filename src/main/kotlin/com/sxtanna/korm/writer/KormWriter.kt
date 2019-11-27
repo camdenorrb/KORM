@@ -288,7 +288,7 @@ class KormWriter(private val indent: Int, private val options: WriterOptions) {
 
     }
 
-    inner class WriterContext internal constructor(private val data: Any, private val writer: Writer) : Exec<Unit> {
+    inner class WriterContext internal constructor(private val data: Any, val writer: Writer) : Exec<Unit> {
 
         private var nameCount = 0
 

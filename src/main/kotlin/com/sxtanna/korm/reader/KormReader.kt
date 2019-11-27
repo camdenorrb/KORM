@@ -88,7 +88,7 @@ class KormReader {
      * - Use list of [KormType] to create usable objects
      *
      */
-    inner class ReaderContext internal constructor(private val reader: Reader) : Exec<Unit> {
+    inner class ReaderContext internal constructor(val reader: Reader) : Exec<Unit> {
 
         private val types = mutableListOf<KormType>()
         private val cache = mutableMapOf<Type, Any>() // testing out inner class deserialization
